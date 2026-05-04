@@ -1,0 +1,335 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Body Algodón Orgánico",
+      "description": "Body de algodón 100% orgánico, suave y transpirable. Perfecto para la piel sensible del bebé.",
+      "price": 18.99,
+      "originalPrice": 24.99,
+      "category": "ropa",
+      "subcategory": "bodies",
+      "image": "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=500",
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500"
+      ],
+      "sizes": ["0-3m", "3-6m", "6-12m", "12-18m"],
+      "colors": ["Blanco", "Rosa", "Celeste"],
+      "isNew": true,
+      "isOnSale": true,
+      "stock": 25,
+      "rating": 4.8
+    },
+    {
+      "id": 2,
+      "name": "Conjunto Punto Recién Nacido",
+      "description": "Conjunto de punto suave que incluye jersey y pantalón. Ideal para los primeros días.",
+      "price": 34.99,
+      "originalPrice": null,
+      "category": "ropa",
+      "subcategory": "conjuntos",
+      "image": "https://images.unsplash.com/photo-1596815064285-45ed8a9c0463?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1596815064285-45ed8a9c0463?w=500"
+      ],
+      "sizes": ["0-3m", "3-6m"],
+      "colors": ["Beige", "Gris", "Menta"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 15,
+      "rating": 4.9
+    },
+    {
+      "id": 3,
+      "name": "Manta Polar Estrellitas",
+      "description": "Manta polar ultra suave con diseño de estrellas. Perfecta para paseos y siestas.",
+      "price": 22.50,
+      "originalPrice": 29.99,
+      "category": "accesorios",
+      "subcategory": "mantas",
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Blanco", "Gris", "Rosa"],
+      "isNew": false,
+      "isOnSale": true,
+      "stock": 30,
+      "rating": 4.7
+    },
+    {
+      "id": 4,
+      "name": "Babero Silicona Premium",
+      "description": "Babero de silicona alimentaria con bolsillo recogedor. Fácil de limpiar y muy resistente.",
+      "price": 12.99,
+      "originalPrice": null,
+      "category": "alimentacion",
+      "subcategory": "baberos",
+      "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Menta", "Melocotón", "Gris"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 50,
+      "rating": 4.6
+    },
+    {
+      "id": 5,
+      "name": "Pijama Algodón Nubes",
+      "description": "Pijama enterizo de algodón con estampado de nubes. Cierre frontal con cremallera.",
+      "price": 26.99,
+      "originalPrice": null,
+      "category": "ropa",
+      "subcategory": "pijamas",
+      "image": "https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=500"
+      ],
+      "sizes": ["0-3m", "3-6m", "6-12m", "12-18m", "18-24m"],
+      "colors": ["Blanco/Gris", "Rosa/Blanco", "Azul/Blanco"],
+      "isNew": false,
+      "isOnSale": false,
+      "stock": 20,
+      "rating": 4.8
+    },
+    {
+      "id": 6,
+      "name": "Mordedor Silicona Conejito",
+      "description": "Mordedor de silicona en forma de conejito. Alivia las encías y es 100% seguro.",
+      "price": 8.99,
+      "originalPrice": 11.99,
+      "category": "juguetes",
+      "subcategory": "mordedores",
+      "image": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Rosa", "Menta", "Amarillo"],
+      "isNew": false,
+      "isOnSale": true,
+      "stock": 40,
+      "rating": 4.9
+    },
+    {
+      "id": 7,
+      "name": "Set Vajilla Bambú Ecológica",
+      "description": "Set completo de vajilla de bambú: plato, bowl, cuchara y tenedor. Eco-friendly.",
+      "price": 19.99,
+      "originalPrice": null,
+      "category": "alimentacion",
+      "subcategory": "vajilla",
+      "image": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Natural", "Rosa", "Azul"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 18,
+      "rating": 4.7
+    },
+    {
+      "id": 8,
+      "name": "Gorro y Manoplas Punto",
+      "description": "Set de gorro y manoplas tejidos a mano. Suaves y cálidos para el invierno.",
+      "price": 16.50,
+      "originalPrice": null,
+      "category": "accesorios",
+      "subcategory": "gorros",
+      "image": "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500"
+      ],
+      "sizes": ["0-6m", "6-12m", "12-24m"],
+      "colors": ["Blanco", "Beige", "Gris"],
+      "isNew": false,
+      "isOnSale": false,
+      "stock": 22,
+      "rating": 4.8
+    },
+    {
+      "id": 9,
+      "name": "Peluche Musical Ovejita",
+      "description": "Peluche suave de ovejita con melodías relajantes. Perfecto para dormir.",
+      "price": 24.99,
+      "originalPrice": 32.99,
+      "category": "juguetes",
+      "subcategory": "peluches",
+      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Blanco", "Beige"],
+      "isNew": false,
+      "isOnSale": true,
+      "stock": 12,
+      "rating": 4.9
+    },
+    {
+      "id": 10,
+      "name": "Vestido Ceremonia Tul",
+      "description": "Precioso vestido de ceremonia con tul y detalles bordados. Ideal para ocasiones especiales.",
+      "price": 45.99,
+      "originalPrice": null,
+      "category": "ropa",
+      "subcategory": "vestidos",
+      "image": "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500"
+      ],
+      "sizes": ["6-12m", "12-18m", "18-24m", "2-3a"],
+      "colors": ["Blanco", "Rosa pálido", "Marfil"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 8,
+      "rating": 5.0
+    },
+    {
+      "id": 11,
+      "name": "Chupetero Silicona Personalizable",
+      "description": "Chupetero de silicona alimentaria con clip seguro. Se puede personalizar con el nombre.",
+      "price": 9.99,
+      "originalPrice": null,
+      "category": "accesorios",
+      "subcategory": "chupeteros",
+      "image": "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Menta", "Rosa", "Azul", "Gris"],
+      "isNew": false,
+      "isOnSale": false,
+      "stock": 35,
+      "rating": 4.6
+    },
+    {
+      "id": 12,
+      "name": "Biberón Anticólicos 260ml",
+      "description": "Biberón con sistema anticólicos avanzado. Tetina de silicona flujo medio.",
+      "price": 14.99,
+      "originalPrice": 18.99,
+      "category": "alimentacion",
+      "subcategory": "biberones",
+      "image": "https://images.unsplash.com/photo-1584839404134-0f917d456e3c?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1584839404134-0f917d456e3c?w=500"
+      ],
+      "sizes": ["150ml", "260ml", "330ml"],
+      "colors": ["Transparente", "Rosa", "Azul"],
+      "isNew": false,
+      "isOnSale": true,
+      "stock": 45,
+      "rating": 4.8
+    },
+    {
+      "id": 13,
+      "name": "Zapatitos Primeros Pasos",
+      "description": "Zapatitos flexibles ideales para los primeros pasos. Suela antideslizante.",
+      "price": 21.99,
+      "originalPrice": null,
+      "category": "accesorios",
+      "subcategory": "calzado",
+      "image": "https://images.unsplash.com/photo-1566206091558-7f218b696731?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1566206091558-7f218b696731?w=500"
+      ],
+      "sizes": ["18", "19", "20", "21", "22"],
+      "colors": ["Blanco", "Rosa", "Azul marino"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 16,
+      "rating": 4.7
+    },
+    {
+      "id": 14,
+      "name": "Caja Musical de Madera",
+      "description": "Preciosa caja musical de madera con melodía suave. Decoración clásica.",
+      "price": 28.99,
+      "originalPrice": null,
+      "category": "juguetes",
+      "subcategory": "musicales",
+      "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500"
+      ],
+      "sizes": ["Único"],
+      "colors": ["Madera natural", "Blanco"],
+      "isNew": false,
+      "isOnSale": false,
+      "stock": 10,
+      "rating": 4.9
+    },
+    {
+      "id": 15,
+      "name": "Pack 3 Bodies Básicos",
+      "description": "Pack de 3 bodies básicos en colores neutros. Algodón suave de primera calidad.",
+      "price": 29.99,
+      "originalPrice": 39.99,
+      "category": "ropa",
+      "subcategory": "bodies",
+      "image": "https://images.unsplash.com/photo-1596815064285-45ed8a9c0463?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1596815064285-45ed8a9c0463?w=500"
+      ],
+      "sizes": ["0-3m", "3-6m", "6-12m", "12-18m"],
+      "colors": ["Blanco/Gris/Beige"],
+      "isNew": false,
+      "isOnSale": true,
+      "stock": 28,
+      "rating": 4.8
+    },
+    {
+      "id": 16,
+      "name": "Saco Dormir Invierno",
+      "description": "Saco de dormir térmico para invierno. Mantiene al bebé calentito toda la noche.",
+      "price": 38.99,
+      "originalPrice": null,
+      "category": "accesorios",
+      "subcategory": "sacos",
+      "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500",
+      "images": [
+        "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500"
+      ],
+      "sizes": ["0-6m", "6-18m", "18-36m"],
+      "colors": ["Gris estrellitas", "Rosa", "Azul"],
+      "isNew": true,
+      "isOnSale": false,
+      "stock": 14,
+      "rating": 4.9
+    }
+  ],
+  "categories": [
+    {
+      "id": "ropa",
+      "name": "Ropa",
+      "description": "Bodies, pijamas, vestidos y conjuntos",
+      "image": "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=500"
+    },
+    {
+      "id": "accesorios",
+      "name": "Accesorios",
+      "description": "Mantas, gorros, chupeteros y más",
+      "image": "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500"
+    },
+    {
+      "id": "alimentacion",
+      "name": "Alimentación",
+      "description": "Baberos, vajilla y biberones",
+      "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500"
+    },
+    {
+      "id": "juguetes",
+      "name": "Juguetes",
+      "description": "Mordedores, peluches y musicales",
+      "image": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=500"
+    }
+  ]
+}
