@@ -1,143 +1,99 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useCart } from "@/context/CartContext";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number | null;
-  image: string;
-  category: string;
-  isNew?: boolean;
-  isOnSale?: boolean;
-  rating?: number;
-}
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { formatPrice } from '@/lib/utils';
 
 interface ProductCardProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    comparePrice?: number | null;
+    images: string[];
+    category?: { name: string } | null;
+    inventory?: { quantity: number } | null;
+  };
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
-    });
-  };
-
-  const discount = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      )
-    : 0;
+  const { addItem } = useCart();
+  const isLowStock = product.inventory && product.inventory.quantity <= 5 && product.inventory.quantity > 0;
+  const isOutOfStock = !product.inventory || product.inventory.quantity === 0;
 
   return (
-    <Link href={`/producto/${product.id}`}>
-      <div className="product-card group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-[#F5F0E8]">
-        {/* Image container */}
-        <div className="relative aspect-square bg-[#F5F0E8] img-zoom-container">
+    <motion.div 
+      whileHover={{ y: -8 }} 
+      transition={{ type: 'spring', stiffness: 300 }} 
+      className="glass-card overflow-hidden group"
+    >
+      <Link href={`/producto/${product.slug}`}>
+        <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
-            src={product.image}
+            src={product.images?.[0] || '/placeholder.jpg'}
             alt={product.name}
             fill
-            className="object-cover"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
-
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {product.isNew && (
-              <span className="bg-[#5FE8C0] text-[#2D3436] text-xs font-body font-semibold px-3 py-1 rounded-full">
-                Nuevo
-              </span>
-            )}
-            {product.isOnSale && discount > 0 && (
-              <span className="bg-[#FF8B5C] text-white text-xs font-body font-semibold px-3 py-1 rounded-full">
-                -{discount}%
-              </span>
-            )}
-          </div>
-
-          {/* Quick actions */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="secondary"
-              size="icon"
-              className="w-9 h-9 rounded-full bg-white/90 hover:bg-white shadow-md"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              <Heart className="w-4 h-4 text-[#2D3436]" />
-            </Button>
-          </div>
-
-          {/* Add to cart button */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-            <Button
-              onClick={handleAddToCart}
-              className="w-full bg-[#2D3436] hover:bg-[#FF8B5C] text-white py-5 rounded-xl font-body text-sm"
-            >
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              Añadir al carrito
-            </Button>
-          </div>
+          {isLowStock && (
+            <span className="absolute top-2 left-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
+              ¡Últimas unidades!
+            </span>
+          )}
+          {isOutOfStock && (
+            <span className="absolute top-2 left-2 px-2 py-1 bg-gray-800 text-white text-xs font-bold rounded-full">
+              Agotado
+            </span>
+          )}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              // TODO: Wishlist
+            }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors opacity-0 group-hover:opacity-100"
+          >
+            <Heart className="w-4 h-4 text-gray-600" />
+          </button>
         </div>
+      </Link>
 
-        {/* Content */}
-        <div className="p-4">
-          <p className="text-xs text-[#636E72] font-body uppercase tracking-wider mb-1">
-            {product.category}
-          </p>
-          <h3 className="font-display text-lg text-[#2D3436] mb-2 line-clamp-2 leading-tight">
+      <div className="p-4">
+        {product.category && (
+          <span className="text-xs font-medium text-baby-rose-dark uppercase tracking-wider">
+            {product.category.name}
+          </span>
+        )}
+        <Link href={`/producto/${product.slug}`}>
+          <h3 className="font-semibold text-gray-800 mt-1 mb-2 line-clamp-2 hover:text-baby-rose-dark transition-colors">
             {product.name}
           </h3>
+        </Link>
 
-          {/* Rating */}
-          {product.rating && (
-            <div className="flex items-center gap-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(product.rating || 0)
-                      ? "fill-[#FFAB85] text-[#FFAB85]"
-                      : "text-[#F5F0E8]"
-                  }`}
-                />
-              ))}
-              <span className="text-xs text-[#636E72] font-body ml-1">
-                ({product.rating})
-              </span>
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-body font-semibold text-[#2D3436]">
-              {product.price.toFixed(2)}€
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-lg font-bold text-gray-900">
+            {formatPrice(product.price)}
+          </span>
+          {product.comparePrice && product.comparePrice > product.price && (
+            <span className="text-sm text-gray-400 line-through">
+              {formatPrice(product.comparePrice)}
             </span>
-            {product.originalPrice && (
-              <span className="text-sm text-[#636E72] line-through font-body">
-                {product.originalPrice.toFixed(2)}€
-              </span>
-            )}
-          </div>
+          )}
         </div>
+
+        <button
+          onClick={() => addItem(product)}
+          disabled={isOutOfStock}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-baby-rose to-baby-mint text-gray-800 font-medium hover:shadow-lg hover:shadow-baby-rose/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ShoppingCart className="w-4 h-4" />
+          {isOutOfStock ? 'Agotado' : 'Agregar al carrito'}
+        </button>
       </div>
-    </Link>
+    </motion.div>
   );
 }

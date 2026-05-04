@@ -1,179 +1,83 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --peach-50: #FFF8F5;
-  --peach-100: #FFEDE5;
-  --peach-200: #FFDACB;
-  --peach-300: #FFC4A8;
-  --peach-400: #FFAB85;
-  --peach-500: #FF8B5C;
-  --mint-50: #F0FDF9;
-  --mint-100: #CCFBEC;
-  --mint-200: #9AF5D8;
-  --mint-300: #5FE8C0;
-  --mint-400: #2DD3A5;
-  --mint-500: #14B88C;
-  --cream: #FEFCF9;
-  --cream-dark: #F5F0E8;
-  --sage: #8FA68F;
-  --sage-dark: #5E7A5E;
-  --charcoal: #2D3436;
-  --warm-gray: #636E72;
-  --blue-50: #F0F8FF;
-  --blue-100: #E0F0FF;
-  --blue-200: #BDE0FE;
-  --blue-300: #A2D2FF;
-  --blue-400: #7CB9E8;
-  --blue-500: #5D9CEC;
-}
-
 @layer base {
-  :root {
-    --background: 30 50% 99%;
-    --foreground: 200 8% 18%;
-    --card: 0 0% 100%;
-    --card-foreground: 200 8% 18%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 200 8% 18%;
-    --primary: 17 100% 68%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 55% 75%;
-    --secondary-foreground: 200 8% 18%;
-    --muted: 30 30% 95%;
-    --muted-foreground: 200 4% 45%;
-    --accent: 30 50% 96%;
-    --accent-foreground: 200 8% 18%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 30 20% 90%;
-    --input: 30 20% 90%;
-    --ring: 17 100% 68%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 200 8% 10%;
-    --foreground: 30 50% 98%;
-    --card: 200 8% 12%;
-    --card-foreground: 30 50% 98%;
-    --popover: 200 8% 12%;
-    --popover-foreground: 30 50% 98%;
-    --primary: 17 100% 68%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 55% 30%;
-    --secondary-foreground: 30 50% 98%;
-    --muted: 200 8% 18%;
-    --muted-foreground: 200 4% 60%;
-    --accent: 200 8% 18%;
-    --accent-foreground: 30 50% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 200 8% 20%;
-    --input: 200 8% 20%;
-    --ring: 17 100% 68%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'DM Sans', sans-serif;
+    @apply bg-baby-white text-gray-800 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 500;
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border-color: rgba(244, 194, 194, 0.6);
+  }
+
+  .glass-button {
+    @apply px-6 py-3 rounded-full font-medium transition-all duration-300;
+    background: linear-gradient(135deg, rgba(244,194,194,0.9), rgba(181,234,215,0.9));
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 4px 15px rgba(244,194,194,0.3);
+  }
+
+  .glass-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(244,194,194,0.5);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #E8A0A0, #9DDAC0, #8BC4F5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: 'Cormorant Garamond', serif;
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
-  .font-body {
-    font-family: 'DM Sans', sans-serif;
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
   }
-  .glass {
-    @apply bg-white/60 backdrop-blur-lg border border-white/40 shadow-sm dark:bg-black/40 dark:border-white/10;
-  }
-  .glass-card {
-    @apply bg-white/40 backdrop-blur-md border border-white/30 shadow-lg rounded-2xl dark:bg-black/30 dark:border-white/10;
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--cream-dark);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--peach-300);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--peach-400);
-}
-
-/* Smooth animations */
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-up {
-  animation: slideUp 0.4s ease-out;
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Product card hover effect */
-.product-card {
-  transition: all 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-}
-
-.product-card:hover img {
-  transform: scale(1.05);
-}
-
-/* Image zoom container */
-.img-zoom-container {
-  overflow: hidden;
-}
-
-.img-zoom-container img {
-  transition: transform 0.5s ease;
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }

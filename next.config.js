@@ -31,3 +31,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+// Configuración de imágenes ya existe en el archivo original

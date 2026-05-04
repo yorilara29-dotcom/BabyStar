@@ -1,81 +1,91 @@
-"use client";
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { generateSlug } from '@/lib/utils';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { createProduct } from "../actions";
+async function createProduct(formData: FormData) {
+  'use server';
+  const session = await auth();
+  if (!session?.user?.role?.includes('ADMIN')) throw new Error('Unauthorized');
 
-export default function NuevoProductoPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const name = formData.get('name') as string;
+  const description = formData.get('description') as string;
+  const price = parseFloat(formData.get('price') as string);
+  const sku = formData.get('sku') as string;
+  const categoryId = formData.get('categoryId') as string;
+  const stock = parseInt(formData.get('stock') as string);
+  const image = (formData.get('image') as string) || '/placeholder.jpg';
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    try {
-      await createProduct(formData);
-      router.push("/admin/productos");
-    } catch (error) {
-      console.error(error);
-      alert("Error creando producto");
-    } finally {
-      setLoading(false);
-    }
-  }
+  await prisma.$transaction(async (tx) => {
+    const product = await tx.product.create({
+      data: {
+        name,
+        slug: generateSlug(name),
+        description,
+        price,
+        sku,
+        images: [image],
+        categoryId,
+      },
+    });
+    await tx.inventory.create({
+      data: { productId: product.id, quantity: stock, lowStock: 5 },
+    });
+  });
+
+  redirect('/admin/productos');
+}
+
+export default async function NuevoProductoPage() {
+  const session = await auth();
+  if (!session?.user?.role?.includes('ADMIN')) redirect('/login');
+
+  const categories = await prisma.category.findMany({ where: { isActive: true } });
 
   return (
-    <div className="fade-in max-w-2xl mx-auto">
-      <h1 className="text-3xl font-display text-[var(--charcoal)] mb-8">Nuevo Producto</h1>
-      
-      <form onSubmit={handleSubmit} className="glass-card p-8 border border-white/60 space-y-6">
-        <div className="space-y-2">
-          <label className="text-sm font-body text-[var(--charcoal)]">Nombre del Producto</label>
-          <Input name="name" required className="bg-white/50 border-white/40" />
+    <div className="space-y-8 max-w-2xl">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Nuevo Producto</h1>
+        <p className="text-gray-500 mt-1">Agrega un producto al catálogo</p>
+      </div>
+      <form action={createProduct} className="glass-card p-8 space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+          <input name="name" required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all" />
         </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-body text-[var(--charcoal)]">Descripción</label>
-          <textarea 
-            name="description" 
-            rows={4}
-            className="w-full rounded-md border border-white/40 bg-white/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <textarea name="description" rows={4} required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all resize-none" />
         </div>
-
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-body text-[var(--charcoal)]">Precio (€)</label>
-            <Input name="price" type="number" step="0.01" required className="bg-white/50 border-white/40" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+            <input name="price" type="number" step="0.01" required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all" />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-body text-[var(--charcoal)]">SKU</label>
-            <Input name="sku" required className="bg-white/50 border-white/40" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+            <input name="sku" required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all" />
           </div>
         </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-body text-[var(--charcoal)]">URL de la Imagen Principal</label>
-          <Input name="image" required className="bg-white/50 border-white/40" placeholder="https://..." />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select name="categoryId" required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all bg-white">
+              {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Stock inicial</label>
+            <input name="stock" type="number" defaultValue={10} required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all" />
+          </div>
         </div>
-
-        <div className="flex justify-end gap-4 pt-4 border-t border-[var(--peach-100)]">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => router.back()}
-            className="border-[var(--peach-200)] text-[var(--charcoal)]"
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="bg-[var(--peach-500)] hover:bg-[var(--peach-400)] text-white"
-          >
-            {loading ? "Guardando..." : "Guardar Producto"}
-          </Button>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">URL de imagen</label>
+          <input name="image" type="url" placeholder="https://..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all" />
+        </div>
+        <div className="flex justify-end gap-4">
+          <a href="/admin/productos" className="px-6 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors">Cancelar</a>
+          <button type="submit" className="px-6 py-3 bg-baby-rose text-gray-800 rounded-xl font-medium hover:bg-baby-rose-dark transition-colors">Crear producto</button>
         </div>
       </form>
     </div>

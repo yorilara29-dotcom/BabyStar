@@ -6,20 +6,10 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
-import {
-  ShoppingBag,
-  Heart,
-  Minus,
-  Plus,
-  Truck,
-  RefreshCw,
-  Shield,
-  ChevronRight,
-  Star,
-} from "lucide-react";
+import { ShoppingCart, Heart, Minus, Plus, Truck, RefreshCw, Shield, ChevronRight, Star } from "lucide-react";
 
 export function ProductContent({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
@@ -27,14 +17,13 @@ export function ProductContent({ product, relatedProducts }: { product: any, rel
   const [currentImage, setCurrentImage] = useState(0);
 
   const handleAddToCart = () => {
-    addToCart({
+    addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
-      image: product.image,
+      price: Number(product.price),
+      image: product.images?.[0] || '',
       quantity,
-      size: selectedSize,
-      color: selectedColor,
+      slug: product.slug,
     });
   };
 

@@ -45,7 +45,7 @@ export default async function LoginPage() {
                 name="email"
                 required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all"
-                placeholder="admin@babystar.com"
+                placeholder="Tu email de administrador"
               />
             </div>
             <div>
@@ -67,7 +67,7 @@ export default async function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Demo: admin@babystar.com / admin123</p>
+            <p>Ingresa tus credenciales de administrador</p>
           </div>
         </div>
       </div>

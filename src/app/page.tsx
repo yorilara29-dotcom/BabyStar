@@ -3,67 +3,67 @@ import Image from "next/image";
 import { ArrowRight, Truck, Shield, RefreshCw, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
-import { getProducts, getCategories } from "@/lib/data";
-import { prisma } from "@/lib/prisma";
+import { getProducts, getCategories, getContentBlock } from "@/lib/data";
+
+export const revalidate = 60;
 
 export default async function HomePage() {
-  const products = await getProducts();
-  const categories = await getCategories();
-  const cmsBlocks = await prisma.contentBlock.findMany();
+  const [productsResult, safeCategories, heroTitle, heroSubtitle] = await Promise.all([
+    getProducts({ limit: 100 }).catch((err) => {
+      console.error('[HomePage] Error fetching products:', err);
+      return { products: [], total: 0, pages: 0 };
+    }),
+    getCategories().catch((err) => {
+      console.error('[HomePage] Error fetching categories:', err);
+      return [];
+    }),
+    getContentBlock('hero_title').catch(() => null),
+    getContentBlock('hero_subtitle').catch(() => null),
+  ]);
 
-  const getCms = (id: string, fallback: string) => 
-    cmsBlocks.find(b => b.identifier === id)?.content || fallback;
-  
-  const newProducts = products.slice(0, 4); // For now just grab first 4
-  const saleProducts = products
-    .filter((p) => p.isOnSale)
+  const safeProducts = Array.isArray(productsResult.products) ? productsResult.products : [];
+  const newProducts = safeProducts.slice(0, 4);
+  const saleProducts = safeProducts
+    .filter((p) => p.comparePrice && Number(p.comparePrice) > Number(p.price))
     .slice(0, 4);
 
   return (
     <div className="fade-in">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[var(--peach-50)] via-[var(--cream)] to-[var(--blue-50)] overflow-hidden">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[var(--peach-200)] rounded-full blur-3xl mix-blend-multiply animate-pulse duration-[3000ms]" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--mint-200)] rounded-full blur-3xl mix-blend-multiply animate-pulse duration-[4000ms]" />
-          <div className="absolute top-40 right-1/3 w-64 h-64 bg-[var(--blue-200)] rounded-full blur-3xl mix-blend-multiply animate-pulse duration-[3500ms]" />
+      <section className="relative bg-gradient-to-br from-baby-rose/20 via-baby-white to-baby-mint/20 overflow-hidden">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-baby-rose rounded-full blur-3xl mix-blend-multiply animate-float" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-baby-mint rounded-full blur-3xl mix-blend-multiply animate-float" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-40 right-1/3 w-64 h-64 bg-baby-sky rounded-full blur-3xl mix-blend-multiply animate-float" style={{ animationDelay: '4s' }} />
         </div>
 
         <div className="container mx-auto px-4 py-16 md:py-24 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <span className="inline-block bg-[#FF8B5C]/10 text-[#FF8B5C] px-4 py-2 rounded-full text-sm font-body mb-6">
-                Nueva colección primavera
+              <span className="inline-block bg-baby-rose/20 text-baby-rose-dark px-4 py-2 rounded-full text-sm font-medium mb-6">
+                Nueva colección 2026
               </span>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display text-[#2D3436] leading-tight mb-6">
-                {getCms('home-hero-title', 'Lo mejor para los más pequeños')}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 text-gradient">
+                {heroTitle?.value || 'Bienvenido a Baby Star'}
               </h1>
-              <p className="text-lg text-[#636E72] font-body max-w-lg mb-8">
-                {getCms('home-hero-subtitle', 'Descubre nuestra selección de ropa, accesorios y juguetes diseñados con amor y materiales de la más alta calidad.')}
+              <p className="text-lg text-gray-600 max-w-lg mb-8">
+                {heroSubtitle?.value || 'Todo lo mejor para tu pequeña estrella'}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  asChild
-                  className="bg-[#FF8B5C] hover:bg-[#FFAB85] text-white px-8 py-6 text-base rounded-full"
-                >
+                <Button asChild className="glass-button px-8 py-6 text-base">
                   <Link href="/tienda">
                     Explorar tienda
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-[#2D3436] text-[#2D3436] hover:bg-[#2D3436] hover:text-white px-8 py-6 text-base rounded-full"
-                >
-                  <Link href="/nosotros">Conocer más</Link>
+                <Button asChild variant="outline" className="px-8 py-6 text-base rounded-full border-2 border-baby-rose text-baby-rose-dark hover:bg-baby-rose/10">
+                  <Link href="/tienda?featured=true">Ver destacados</Link>
                 </Button>
               </div>
             </div>
 
             <div className="relative">
               <div className="relative aspect-square max-w-lg mx-auto">
-                <div className="absolute inset-0 bg-[#FFDACB] rounded-full scale-90" />
+                <div className="absolute inset-0 bg-baby-rose/30 rounded-full scale-90" />
                 <Image
                   src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600"
                   alt="Bebé feliz"
@@ -72,296 +72,139 @@ export default async function HomePage() {
                   priority
                 />
               </div>
-              {/* Floating badges */}
-              <div className="absolute top-10 -left-4 glass-card p-4 animate-bounce">
-                <p className="text-2xl font-display text-[#2D3436]">-20%</p>
-                <p className="text-xs text-[#636E72] font-body">
-                  Primera compra
-                </p>
+              <div className="absolute top-10 -left-4 glass-card p-4 animate-float">
+                <p className="text-2xl font-bold text-gray-900">-20%</p>
+                <p className="text-xs text-gray-500">Primera compra</p>
               </div>
-              <div className="absolute bottom-10 -right-4 glass-card p-4 slide-up">
-                <p className="text-sm font-body text-[#636E72]">Envío gratis</p>
-                <p className="text-lg font-display text-[#2D3436]">+60€</p>
+              <div className="absolute bottom-10 -right-4 glass-card p-4 animate-slide-up">
+                <p className="text-sm text-gray-500">Envío gratis</p>
+                <p className="text-lg font-bold text-gray-900">+$50</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-12 bg-white border-y border-[#F5F0E8]">
+      <section className="py-12 bg-white border-y border-gray-100">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              {
-                icon: Truck,
-                title: "Envío gratis +60€",
-                desc: "En península",
-              },
-              {
-                icon: RefreshCw,
-                title: "Devolución fácil",
-                desc: "30 días",
-              },
-              {
-                icon: Shield,
-                title: "Pago seguro",
-                desc: "SSL certificado",
-              },
-              {
-                icon: Heart,
-                title: "Hecho con amor",
-                desc: "Calidad premium",
-              },
+              { icon: Truck, title: "Envío gratis +$50", desc: "En todos los pedidos" },
+              { icon: RefreshCw, title: "Devolución fácil", desc: "30 días" },
+              { icon: Shield, title: "Pago seguro", desc: "SSL certificado" },
+              { icon: Heart, title: "Hecho con amor", desc: "Calidad premium" },
             ].map((feature, i) => (
               <div key={i} className="text-center">
-                <div className="w-12 h-12 bg-[#FFEDE5] rounded-full flex items-center justify-center mx-auto mb-3">
-                  <feature.icon className="w-5 h-5 text-[#FF8B5C]" />
+                <div className="w-12 h-12 bg-baby-rose/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <feature.icon className="w-5 h-5 text-baby-rose-dark" />
                 </div>
-                <h3 className="font-display text-[#2D3436] mb-1">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-[#636E72] font-body">
-                  {feature.desc}
-                </p>
+                <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
+                <p className="text-sm text-gray-500">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-16 md:py-24 bg-[#FEFCF9]">
+      <section className="py-16 md:py-24 bg-baby-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display text-[#2D3436] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-gradient">
               Explora por categorías
             </h2>
-            <p className="text-[#636E72] font-body max-w-md mx-auto">
-              Encuentra todo lo que necesitas para tu bebé organizado por
-              categorías
+            <p className="text-gray-500 max-w-md mx-auto">
+              Encuentra todo lo que necesitas para tu bebé organizado por categorías
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/tienda?category=${category.id}`}
-                className="group"
-              >
-                <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F5F0E8] img-zoom-container">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D3436]/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h3 className="font-display text-xl mb-1">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-white/80 font-body">
-                      {category.description}
-                    </p>
+          {safeCategories.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No hay categorías disponibles</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {safeCategories.map((category) => (
+                <Link key={category.id} href={`/tienda?category=${category.slug}`} className="group">
+                  <div className="glass-card p-8 text-center group cursor-pointer">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{category.name}</h3>
+                    <p className="text-sm text-gray-500">{category.description}</p>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* New Products */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-display text-[#2D3436] mb-2">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-gradient">
                 Novedades
               </h2>
-              <p className="text-[#636E72] font-body">
-                Los últimos productos que hemos añadido
-              </p>
+              <p className="text-gray-500">Los últimos productos que hemos añadido</p>
             </div>
-            <Button
-              asChild
-              variant="outline"
-              className="hidden md:flex border-[#FFDACB] text-[#2D3436] hover:bg-[#FFEDE5]"
-            >
-              <Link href="/tienda?new=true">
-                Ver todo
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+            <Button asChild variant="outline" className="hidden md:flex border-baby-rose text-gray-800 hover:bg-baby-rose/10">
+              <Link href="/tienda">Ver todo <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {newProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          <div className="mt-8 text-center md:hidden">
-            <Button
-              asChild
-              variant="outline"
-              className="border-[#FFDACB] text-[#2D3436] hover:bg-[#FFEDE5]"
-            >
-              <Link href="/tienda?new=true">
-                Ver todas las novedades
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          {newProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No hay productos disponibles</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {newProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="py-16 bg-gradient-to-r from-[#5FE8C0] to-[#2DD3A5]">
+      <section className="py-16 bg-gradient-to-r from-baby-mint to-baby-mint-dark">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-display text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             ¿Primera compra?
           </h2>
-          <p className="text-white/90 font-body text-lg mb-6 max-w-lg mx-auto">
-            Usa el código <span className="font-semibold">BIENVENIDO20</span>{" "}
-            para obtener un 20% de descuento en tu primer pedido
+          <p className="text-gray-700 text-lg mb-6 max-w-lg mx-auto">
+            Obtén un <span className="font-bold">20% de descuento</span> en tu primer pedido
           </p>
-          <Button
-            asChild
-            className="bg-white text-[#14B88C] hover:bg-white/90 px-8 py-6 text-base rounded-full"
-          >
+          <Button asChild className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-6 text-base rounded-full font-semibold">
             <Link href="/tienda">Comprar ahora</Link>
           </Button>
         </div>
       </section>
 
-      {/* Sale Products */}
-      <section className="py-16 md:py-24 bg-[#FFF8F5]">
+      <section className="py-16 md:py-24 bg-baby-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <span className="inline-block bg-[#FF8B5C] text-white px-3 py-1 rounded-full text-sm font-body mb-2">
+              <span className="inline-block bg-baby-rose text-white px-3 py-1 rounded-full text-sm font-medium mb-2">
                 Ofertas
               </span>
-              <h2 className="text-3xl md:text-4xl font-display text-[#2D3436]">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-gradient">
                 Productos en oferta
               </h2>
             </div>
-            <Button
-              asChild
-              variant="outline"
-              className="hidden md:flex border-[#FF8B5C] text-[#FF8B5C] hover:bg-[#FFEDE5]"
-            >
-              <Link href="/tienda?sale=true">
-                Ver ofertas
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+            <Button asChild variant="outline" className="hidden md:flex border-baby-rose text-baby-rose-dark hover:bg-baby-rose/10">
+              <Link href="/tienda">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {saleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          <div className="mt-8 text-center md:hidden">
-            <Button
-              asChild
-              variant="outline"
-              className="border-[#FF8B5C] text-[#FF8B5C] hover:bg-[#FFEDE5]"
-            >
-              <Link href="/tienda?sale=true">
-                Ver todas las ofertas
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display text-[#2D3436] mb-4">
-              Lo que dicen nuestros clientes
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "María García",
-                text: "La calidad de la ropa es increíble. Mi bebé está muy cómodo y los diseños son preciosos.",
-                rating: 5,
-              },
-              {
-                name: "Carlos López",
-                text: "Envío rapidísimo y el embalaje muy cuidado. Repetiré seguro.",
-                rating: 5,
-              },
-              {
-                name: "Ana Martínez",
-                text: "Me encanta que todo sea de materiales naturales. Se nota la diferencia.",
-                rating: 5,
-              },
-            ].map((testimonial, i) => (
-              <div
-                key={i}
-                className="glass-card p-6 border border-white/40 hover:scale-105 transition-transform duration-300"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, j) => (
-                    <span key={j} className="text-[#FFAB85]">
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <p className="text-[#636E72] font-body mb-4 italic">
-                  "{testimonial.text}"
-                </p>
-                <p className="font-display text-[#2D3436]">{testimonial.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Instagram Section */}
-      <section className="py-16 bg-[#FEFCF9]">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-display text-[#2D3436] mb-2">
-            Síguenos en Instagram
-          </h2>
-          <p className="text-[#636E72] font-body mb-8">@babystar.es</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[
-              "https://images.unsplash.com/photo-1522771930-78848d9293e8?w=300",
-              "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300",
-              "https://images.unsplash.com/photo-1596815064285-45ed8a9c0463?w=300",
-              "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=300",
-              "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=300",
-              "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300",
-            ].map((img, i) => (
-              <a
-                key={i}
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative aspect-square rounded-xl overflow-hidden group"
-              >
-                <Image src={img} alt="Instagram" fill className="object-cover" />
-                <div className="absolute inset-0 bg-[#FF8B5C]/0 group-hover:bg-[#FF8B5C]/30 transition-colors flex items-center justify-center">
-                  <span className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    ♥
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
+          {saleProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No hay ofertas disponibles</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {saleProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

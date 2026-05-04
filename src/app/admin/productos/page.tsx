@@ -1,109 +1,84 @@
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { Plus, Edit, Trash2 } from "lucide-react";
-import Image from "next/image";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
+import { deleteProduct } from './actions';
 
-export default async function AdminProductsPage() {
+export default async function ProductosPage() {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session?.user?.role?.includes('ADMIN')) redirect('/login');
 
   const products = await prisma.product.findMany({
-    include: {
-      category: true,
-      variants: true,
-    },
-    orderBy: { createdAt: 'desc' }
+    include: { category: true, inventory: true },
+    orderBy: { createdAt: 'desc' },
   });
 
   return (
-    <div className="fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-display text-[var(--charcoal)]">Productos</h1>
-        <Link 
-          href="/admin/productos/nuevo"
-          className="flex items-center gap-2 bg-[var(--peach-500)] hover:bg-[var(--peach-400)] text-white px-4 py-2 rounded-lg font-body transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo Producto
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
+          <p className="text-gray-500 mt-1">Gestiona tu catálogo</p>
+        </div>
+        <Link href="/admin/productos/nuevo">
+          <button className="flex items-center gap-2 px-4 py-2 bg-baby-rose text-gray-800 rounded-xl font-medium hover:bg-baby-rose-dark transition-colors">
+            <Plus className="w-4 h-4" /> Nuevo producto
+          </button>
         </Link>
       </div>
 
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left font-body">
-            <thead className="bg-[var(--peach-50)] text-[var(--warm-gray)] text-sm uppercase tracking-wider">
-              <tr>
+          <table className="w-full">
+            <thead className="bg-gray-50/50">
+              <tr className="text-left text-sm text-gray-500 border-b border-gray-200">
                 <th className="px-6 py-4 font-medium">Producto</th>
                 <th className="px-6 py-4 font-medium">Categoría</th>
                 <th className="px-6 py-4 font-medium">Precio</th>
-                <th className="px-6 py-4 font-medium">Stock (Variantes)</th>
-                <th className="px-6 py-4 font-medium text-right">Acciones</th>
+                <th className="px-6 py-4 font-medium">Stock</th>
+                <th className="px-6 py-4 font-medium">Estado</th>
+                <th className="px-6 py-4 font-medium">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--peach-100)]">
-              {products.map((product) => {
-                const totalStock = product.variants.reduce((acc, v) => acc + v.stock, 0);
-
-                return (
-                  <tr key={product.id} className="hover:bg-white/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[var(--peach-50)]">
-                          {product.images[0] && (
-                            <Image 
-                              src={product.images[0]} 
-                              alt={product.name}
-                              fill
-                              className="object-cover"
-                            />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium text-[var(--charcoal)]">{product.name}</div>
-                          <div className="text-xs text-[var(--warm-gray)]">{product.sku}</div>
-                        </div>
+            <tbody className="text-sm">
+              {products.map((product) => (
+                <tr key={product.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden">
+                        {product.images[0] && <img src={product.images[0]} alt="" className="w-full h-full object-cover" />}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--charcoal)]">
-                      {product.category?.name || "Sin categoría"}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--charcoal)]">
-                      €{product.price.toString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        totalStock > 10 ? 'bg-green-100 text-green-800' : 
-                        totalStock > 0 ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {totalStock} unid.
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link 
-                          href={`/admin/productos/${product.id}/editar`}
-                          className="p-2 text-[var(--blue-500)] hover:bg-[var(--blue-50)] rounded-lg transition-colors"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        <button className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <span className="font-medium text-gray-900">{product.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600">{product.category.name}</td>
+                  <td className="px-6 py-4 font-medium">{formatPrice(product.price)}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      (product.inventory?.quantity || 0) <= 5 ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
+                    }`}>{product.inventory?.quantity || 0}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {product.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/admin/productos/${product.id}/editar`} className="p-2 rounded-lg hover:bg-baby-rose/10 text-gray-600 hover:text-baby-rose-dark transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </Link>
+                      <form action={deleteProduct.bind(null, product.id)}>
+                        <button className="p-2 rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-500 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {products.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-[var(--warm-gray)]">
-                    No hay productos registrados.
+                      </form>
+                    </div>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>

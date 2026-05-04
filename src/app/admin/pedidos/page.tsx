@@ -1,86 +1,63 @@
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { formatPrice } from '@/lib/utils';
+import { ShoppingBag } from 'lucide-react';
 
-export default async function AdminPedidosPage() {
+export default async function PedidosPage() {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session?.user?.role?.includes('ADMIN')) redirect('/login');
 
   const orders = await prisma.order.findMany({
-    include: {
-      user: true,
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: true,
-            }
-          }
-        }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
+    include: { user: true, items: true },
+    orderBy: { createdAt: 'desc' },
   });
 
   return (
-    <div className="fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-display text-[var(--charcoal)]">Pedidos</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Pedidos</h1>
+        <p className="text-gray-500 mt-1">Gestiona las órdenes de los clientes</p>
       </div>
-
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left font-body">
-            <thead className="bg-[var(--peach-50)] text-[var(--warm-gray)] text-sm uppercase tracking-wider">
-              <tr>
-                <th className="px-6 py-4 font-medium">ID Pedido</th>
-                <th className="px-6 py-4 font-medium">Fecha</th>
+          <table className="w-full">
+            <thead className="bg-gray-50/50">
+              <tr className="text-left text-sm text-gray-500 border-b border-gray-200">
+                <th className="px-6 py-4 font-medium">ID</th>
                 <th className="px-6 py-4 font-medium">Cliente</th>
+                <th className="px-6 py-4 font-medium">Items</th>
                 <th className="px-6 py-4 font-medium">Total</th>
                 <th className="px-6 py-4 font-medium">Estado</th>
-                <th className="px-6 py-4 font-medium text-right">Items</th>
+                <th className="px-6 py-4 font-medium">Pago</th>
+                <th className="px-6 py-4 font-medium">Fecha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--peach-100)]">
+            <tbody className="text-sm">
               {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-white/50 transition-colors">
-                  <td className="px-6 py-4 text-[var(--charcoal)] font-medium">
-                    #{order.id.slice(0, 8).toUpperCase()}
-                  </td>
-                  <td className="px-6 py-4 text-[var(--charcoal)]">
-                    {order.createdAt.toLocaleDateString("es-ES", {
-                      year: 'numeric', month: 'short', day: 'numeric'
-                    })}
-                  </td>
-                  <td className="px-6 py-4 text-[var(--charcoal)]">
-                    {order.user?.name || order.user?.email || "Invitado"}
-                  </td>
-                  <td className="px-6 py-4 text-[var(--charcoal)] font-semibold">
-                    €{Number(order.totalAmount).toFixed(2)}
+                <tr key={order.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4 font-mono text-xs text-gray-500">{order.id.slice(0, 8)}...</td>
+                  <td className="px-6 py-4">{order.user?.name || order.user?.email || 'Invitado'}</td>
+                  <td className="px-6 py-4">{order.items.length} items</td>
+                  <td className="px-6 py-4 font-medium">{formatPrice(order.total)}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
+                      order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                      order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>{order.status}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                      order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                      order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                      order.status === 'PAID' ? 'bg-emerald-100 text-emerald-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.status}
-                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' :
+                      order.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>{order.paymentStatus}</span>
                   </td>
-                  <td className="px-6 py-4 text-right text-[var(--warm-gray)]">
-                    {order.items.length} producto(s)
-                  </td>
+                  <td className="px-6 py-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString('es-ES')}</td>
                 </tr>
               ))}
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-[var(--warm-gray)]">
-                    Aún no se han registrado pedidos.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
