@@ -1,134 +1,203 @@
-import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
-import productsData from "../src/data/products.json";
+import { PrismaClient, Role, MovementType } from '@prisma/client';
+import { hash } from 'bcryptjs';
+import { z } from 'zod';
 
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
+const prisma = new PrismaClient();
+
+const ProductSchema = z.object({
+  name: z.string().min(2).max(100),
+  slug: z.string().regex(/^[a-z0-9-]+$/),
+  description: z.string().min(10),
+  price: z.number().positive(),
+  sku: z.string().min(3),
+  categorySlug: z.string(),
+  images: z.array(z.string().url()).min(1),
+  stock: z.number().int().min(0),
+  isFeatured: z.boolean().default(false),
 });
 
-async function main() {
-  console.log("Start seeding...");
+const productsData = [
+  {
+    name: "Body Estrella Rosa",
+    slug: "body-estrella-rosa",
+    description: "Body suave de algodón orgánico 100% con diseño de estrella en tono rosa pastel. Ideal para recién nacidos.",
+    price: 24.99,
+    sku: "BS-BODY-001",
+    categorySlug: "ropa",
+    images: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600"],
+    stock: 50,
+    isFeatured: true,
+  },
+  {
+    name: "Manta Suave Nube",
+    slug: "manta-suave-nube",
+    description: "Manta ultra suave con textura de nube en color menta. Perfecta para mantener abrigado al bebé.",
+    price: 39.99,
+    sku: "BS-MANTA-001",
+    categorySlug: "accesorios",
+    images: ["https://images.unsplash.com/photo-1540479859555-17af45c78602?w=600"],
+    stock: 30,
+    isFeatured: true,
+  },
+  {
+    name: "Sonajero Arcoíris",
+    slug: "sonajero-arcoiris",
+    description: "Sonajero de madera natural con colores pastel del arcoíris. Desarrollo sensorial garantizado.",
+    price: 18.50,
+    sku: "BS-JUGU-001",
+    categorySlug: "juguetes",
+    images: ["https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600"],
+    stock: 40,
+    isFeatured: false,
+  },
+  {
+    name: "Set Recién Nacido Azul",
+    slug: "set-recien-nacido-azul",
+    description: "Set completo de 5 piezas en tonos azul cielo: body, pantalón, gorro, babero y calcetines.",
+    price: 59.99,
+    sku: "BS-SET-001",
+    categorySlug: "ropa",
+    images: ["https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600"],
+    stock: 25,
+    isFeatured: true,
+  },
+  {
+    name: "Peluche Estrella Dorada",
+    slug: "peluche-estrella-dorada",
+    description: "Peluche en forma de estrella con detalles dorados. Compañero perfecto para dormir.",
+    price: 29.99,
+    sku: "BS-PEL-001",
+    categorySlug: "juguetes",
+    images: ["https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=600"],
+    stock: 35,
+    isFeatured: true,
+  },
+  {
+    name: "Babero Impermeable Mint",
+    slug: "babero-impermeable-mint",
+    description: "Babero con capa impermeable interna y diseño de hojitas en verde menta. Fácil de lavar.",
+    price: 12.99,
+    sku: "BS-BAB-001",
+    categorySlug: "accesorios",
+    images: ["https://images.unsplash.com/photo-1627856014759-085229246708?w=600"],
+    stock: 60,
+    isFeatured: false,
+  },
+];
 
-  const adminPasswordHash = await bcrypt.hash("admin123", 10);
-  await prisma.user.upsert({
-    where: { email: "admin@babystar.es" },
+const categoriesData = [
+  { name: "Ropa", slug: "ropa", description: "Ropa suave y cómoda para bebés", order: 1 },
+  { name: "Accesorios", slug: "accesorios", description: "Accesorios prácticos y adorables", order: 2 },
+  { name: "Juguetes", slug: "juguetes", description: "Juguetes educativos y seguros", order: 3 },
+];
+
+const contentBlocksData = [
+  { key: "hero_title", value: "Bienvenido a Baby Star", type: "TEXT", section: "home" },
+  { key: "hero_subtitle", value: "Todo lo mejor para tu pequeña estrella ✨", type: "TEXT", section: "home" },
+  { key: "about_text", value: "En Baby Star seleccionamos cuidadosamente cada producto pensando en el confort y seguridad de tu bebé.", type: "TEXT", section: "about" },
+  { key: "shipping_text", value: "Envío gratis en compras mayores a $50. Entrega en 24-48h.", type: "TEXT", section: "footer" },
+];
+
+async function main() {
+  console.log("🌱 Iniciando seed de Baby Star...");
+
+  const adminPassword = await hash("admin123", 12);
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@babystar.com" },
     update: {},
     create: {
-      email: "admin@babystar.es",
-      name: "Super Admin",
-      passwordHash: adminPasswordHash,
-      role: "SUPER_ADMIN",
+      email: "admin@babystar.com",
+      name: "Administrador",
+      password: adminPassword,
+      role: Role.SUPER_ADMIN,
     },
   });
-  console.log("Admin user seeded");
+  console.log(`✅ Admin creado: ${admin.email}`);
 
-  // Content Blocks (CMS Base)
-  await prisma.contentBlock.upsert({
-    where: { identifier: 'home-hero-title' },
-    update: {},
-    create: {
-      identifier: 'home-hero-title',
-      type: 'text',
-      content: 'Lo mejor para los más pequeños',
-    }
-  });
-
-  await prisma.contentBlock.upsert({
-    where: { identifier: 'home-hero-subtitle' },
-    update: {},
-    create: {
-      identifier: 'home-hero-subtitle',
-      type: 'text',
-      content: 'Descubre nuestra selección de ropa, accesorios y juguetes diseñados con amor y materiales de la más alta calidad.',
-    }
-  });
-  console.log("CMS Content Blocks seeded");
-
-  // Insert categories
-  for (const cat of productsData.categories) {
+  for (const cat of categoriesData) {
     await prisma.category.upsert({
-      where: { name: cat.id }, // We'll use the id from JSON as the category name since it's unique
-      update: {
-        description: cat.description,
-      },
-      create: {
-        name: cat.id,
-        description: cat.description,
-      },
+      where: { slug: cat.slug },
+      update: {},
+      create: cat,
     });
   }
+  console.log("✅ Categorías creadas");
 
-  console.log("Categories seeded");
-
-  // Insert products and their variants
-  for (const prod of productsData.products) {
+  for (const prod of productsData) {
+    const validated = ProductSchema.parse(prod);
     const category = await prisma.category.findUnique({
-      where: { name: prod.category },
+      where: { slug: validated.categorySlug },
     });
+    if (!category) continue;
 
-    if (!category) {
-      console.error(`Category ${prod.category} not found for product ${prod.name}`);
-      continue;
-    }
-
-    const createdProduct = await prisma.product.create({
-      data: {
-        name: prod.name,
-        description: prod.description,
-        price: prod.price,
-        categoryId: category.id,
-        images: prod.images,
-        isActive: true,
-      },
-    });
-
-    // Create a base variant for stock
-    if (prod.sizes && prod.sizes.length > 0) {
-      for (const size of prod.sizes) {
-        if (prod.colors && prod.colors.length > 0) {
-          for (const color of prod.colors) {
-            await prisma.productVariant.create({
-              data: {
-                productId: createdProduct.id,
-                sku: `SKU-${createdProduct.id}-${size}-${color}`.replace(/\s+/g, "-").toUpperCase(),
-                size: size,
-                color: color,
-                stock: Math.floor(prod.stock / (prod.sizes.length * prod.colors.length)) || 1,
-              },
-            });
-          }
-        } else {
-          await prisma.productVariant.create({
-            data: {
-              productId: createdProduct.id,
-              sku: `SKU-${createdProduct.id}-${size}`.replace(/\s+/g, "-").toUpperCase(),
-              size: size,
-              stock: Math.floor(prod.stock / prod.sizes.length) || 1,
-            },
-          });
-        }
-      }
-    } else {
-      await prisma.productVariant.create({
-        data: {
-          productId: createdProduct.id,
-          sku: `SKU-${createdProduct.id}-BASE`,
-          stock: prod.stock,
+    await prisma.$transaction(async (tx) => {
+      const product = await tx.product.upsert({
+        where: { sku: validated.sku },
+        update: {
+          name: validated.name,
+          description: validated.description,
+          price: validated.price,
+          images: validated.images,
+          isFeatured: validated.isFeatured,
+          categoryId: category.id,
+        },
+        create: {
+          name: validated.name,
+          slug: validated.slug,
+          description: validated.description,
+          price: validated.price,
+          sku: validated.sku,
+          images: validated.images,
+          categoryId: category.id,
+          isFeatured: validated.isFeatured,
         },
       });
-    }
-  }
 
-  console.log("Products and variants seeded");
-  console.log("Seeding finished.");
+      await tx.inventory.upsert({
+        where: { productId: product.id },
+        update: { quantity: validated.stock },
+        create: {
+          productId: product.id,
+          quantity: validated.stock,
+          lowStock: 5,
+        },
+      });
+
+      const inventory = await tx.inventory.findUnique({
+        where: { productId: product.id },
+      });
+
+      if (inventory) {
+        await tx.inventoryMovement.create({
+          data: {
+            inventoryId: inventory.id,
+            type: MovementType.IN,
+            quantity: validated.stock,
+            reason: "Stock inicial - Seed",
+            createdBy: "system",
+          },
+        });
+      }
+    });
+  }
+  console.log("✅ Productos e inventario creados");
+
+  for (const block of contentBlocksData) {
+    await prisma.contentBlock.upsert({
+      where: { key: block.key },
+      update: { value: block.value },
+      create: block,
+    });
+  }
+  console.log("✅ Content Blocks creados");
+  console.log("🎉 Seed completado!");
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error("❌ Error en seed:", e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
