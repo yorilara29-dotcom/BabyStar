@@ -1,81 +1,73 @@
-"use client";
+import { signIn } from '@/auth';
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { Baby } from 'lucide-react';
 
-import { useActionState } from "react";
-import { authenticate } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Shield } from "lucide-react";
-import Link from "next/link";
+export default async function LoginPage() {
+  const session = await auth();
+  if (session?.user) {
+    redirect(session.user.role === 'USER' ? '/' : '/admin');
+  }
 
-export default function LoginPage() {
-  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
+  async function handleLogin(formData: FormData) {
+    'use server';
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      await signIn('credentials', {
+        email,
+        password,
+        redirectTo: '/admin',
+      });
+    } catch (error) {
+      redirect('/login?error=CredentialsSignin');
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-[var(--blue-50)] via-[var(--cream)] to-[var(--peach-50)]">
-      {/* Background blobs */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-[var(--blue-200)] rounded-full blur-3xl mix-blend-multiply animate-pulse duration-[3000ms]" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-[var(--mint-200)] rounded-full blur-3xl mix-blend-multiply animate-pulse duration-[4000ms]" />
-      </div>
-
-      <div className="relative w-full max-w-md px-4 fade-in">
-        <div className="glass-card p-8 text-center slide-up">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-white/60 rounded-full flex items-center justify-center border border-white/40 shadow-sm">
-              <Shield className="w-8 h-8 text-[var(--peach-500)]" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-baby-rose/20 via-baby-white to-baby-mint/20 px-4">
+      <div className="w-full max-w-md">
+        <div className="glass-card p-8">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-baby-rose to-baby-mint mb-4">
+              <Baby className="w-8 h-8 text-white" />
             </div>
+            <h1 className="text-2xl font-bold text-gray-900">Baby Star</h1>
+            <p className="text-gray-500 mt-1">Inicia sesión en tu cuenta</p>
           </div>
-          
-          <h1 className="text-3xl font-display text-[var(--charcoal)] mb-2">
-            Baby Star Admin
-          </h1>
-          <p className="text-[var(--warm-gray)] font-body text-sm mb-8">
-            Ingresa tus credenciales para acceder al panel.
-          </p>
 
-          <form action={dispatch} className="space-y-4">
-            <div className="space-y-2 text-left">
-              <label className="text-sm font-body text-[var(--charcoal)] ml-1">Email</label>
-              <Input
-                id="email"
+          <form action={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
                 type="email"
                 name="email"
-                placeholder="admin@babystar.es"
                 required
-                className="bg-white/50 border-white/40 focus:border-[var(--peach-400)] focus:ring-[var(--peach-400)] h-12"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all"
+                placeholder="admin@babystar.com"
               />
             </div>
-            
-            <div className="space-y-2 text-left">
-              <label className="text-sm font-body text-[var(--charcoal)] ml-1">Contraseña</label>
-              <Input
-                id="password"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <input
                 type="password"
                 name="password"
-                placeholder="••••••••"
                 required
-                className="bg-white/50 border-white/40 focus:border-[var(--peach-400)] focus:ring-[var(--peach-400)] h-12"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all"
+                placeholder="••••••••"
               />
             </div>
-
-            {errorMessage && (
-              <div className="p-3 bg-red-100/80 border border-red-200 text-red-600 rounded-lg text-sm font-body animate-bounce">
-                {errorMessage}
-              </div>
-            )}
-
-            <Button
+            <button
               type="submit"
-              className="w-full h-12 bg-[var(--peach-500)] hover:bg-[var(--peach-400)] text-white font-body text-base mt-4 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+              className="w-full glass-button py-3"
             >
-              Iniciar Sesión
-            </Button>
+              Iniciar sesión
+            </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-white/20">
-            <Link href="/" className="text-sm font-body text-[var(--warm-gray)] hover:text-[var(--peach-500)] transition-colors">
-              &larr; Volver a la tienda
-            </Link>
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>Demo: admin@babystar.com / admin123</p>
           </div>
         </div>
       </div>

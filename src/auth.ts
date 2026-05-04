@@ -1,31 +1,40 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import { authConfig } from "./auth.config";
+import NextAuth from 'next-auth';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import Credentials from 'next-auth/providers/credentials';
+import { z } from 'zod';
+import { compare } from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
+const credentialsSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   providers: [
     Credentials({
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        const parsed = credentialsSchema.safeParse(credentials);
+        if (!parsed.success) return null;
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: parsed.data.email },
         });
 
-        if (!user || !user.passwordHash) return null;
+        if (!user || !user.password) return null;
 
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        );
-
+        const isValid = await compare(parsed.data.password, user.password);
         if (!isValid) return null;
 
         return {
@@ -37,4 +46,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.sub = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
+      if (token.role) {
+        session.user.role = token.role;
+      }
+      return session;
+    },
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+      const isAdmin = auth?.user?.role === 'ADMIN' || auth?.user?.role === 'SUPER_ADMIN';
+
+      if (isAdminRoute) {
+        if (!isLoggedIn) return false;
+        if (!isAdmin) return false;
+      }
+      return true;
+    },
+  },
 });
