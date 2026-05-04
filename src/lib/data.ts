@@ -1,51 +1,90 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
+import { cache } from 'react';
 
-export async function getProducts() {
-  const products = await prisma.product.findMany({
+export const getProducts = cache(async (options?: {
+  category?: string;
+  featured?: boolean;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  const { category, featured, search, page = 1, limit = 12 } = options || {};
+  const skip = (page - 1) * limit;
+
+  const where = {
+    isActive: true,
+    ...(category && { category: { slug: category } }),
+    ...(featured && { isFeatured: true }),
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        { description: { contains: search, mode: 'insensitive' as const } },
+      ],
+    }),
+  };
+
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: { category: true, inventory: true },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.product.count({ where }),
+  ]);
+
+  return { products, total, pages: Math.ceil(total / limit) };
+});
+
+export const getProductBySlug = cache(async (slug: string) => {
+  return prisma.product.findUnique({
+    where: { slug, isActive: true },
     include: {
       category: true,
-      variants: true,
+      inventory: true,
+      variants: { include: { inventory: true } },
     },
+  });
+});
+
+export const getCategories = cache(async () => {
+  return prisma.category.findMany({
     where: { isActive: true },
+    orderBy: { order: 'asc' },
+  });
+});
+
+export const getFeaturedProducts = cache(async () => {
+  return prisma.product.findMany({
+    where: { isActive: true, isFeatured: true },
+    include: { category: true, inventory: true },
+    take: 8,
+  });
+});
+
+export const getContentBlock = cache(async (key: string) => {
+  return prisma.contentBlock.findUnique({
+    where: { key, isActive: true },
+  });
+});
+
+export const getDashboardMetrics = cache(async () => {
+  const [totalOrders, totalUsers, totalProducts, lowStockProducts] = await Promise.all([
+    prisma.order.count(),
+    prisma.user.count(),
+    prisma.product.count({ where: { isActive: true } }),
+    prisma.inventory.findMany({
+      where: { quantity: { lte: 5 } },
+      include: { product: true },
+    }),
+  ]);
+
+  const recentOrders = await prisma.order.findMany({
+    take: 5,
+    orderBy: { createdAt: 'desc' },
+    include: { user: true, items: true },
   });
 
-  return products.map(product => {
-    return {
-      id: product.id.length > 8
-        ? parseInt(product.id.substring(0, 8), 16) || Math.floor(Math.random() * 100000)
-        : parseInt(product.id) || Math.floor(Math.random() * 100000),
-      dbId: product.id,
-      name: product.name,
-      price: Number(product.price),
-      originalPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
-      image: product.images[0] || "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600",
-      images: product.images.length > 0 ? product.images : ["https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600"],
-      category: product.category?.name || "Sin categoría",
-      categoryId: product.categoryId || "",
-      isNew: false,
-      isOnSale: !!product.compareAtPrice && Number(product.compareAtPrice) > Number(product.price),
-      rating: 5,
-      description: product.description || "",
-      sizes: Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))) as string[],
-      colors: Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))) as string[],
-      stock: product.variants.reduce((acc, v) => acc + v.stock, 0)
-    };
-  });
-}
-
-export async function getCategories() {
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: {
-        select: { products: true }
-      }
-    }
-  });
-
-  return categories.map(c => ({
-    id: c.id,
-    name: c.name,
-    description: c.description || "",
-    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600"
-  }));
-}
+  return { totalOrders, totalUsers, totalProducts, lowStock: lowStockProducts, recentOrders };
+});
