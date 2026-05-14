@@ -5,11 +5,11 @@ import { revalidatePath } from "next/cache";
 
 export async function updateContentBlock(formData: FormData) {
   const id = formData.get("id") as string;
-  const content = formData.get("content") as string;
+  const value = formData.get("value") as string;
 
   await prisma.contentBlock.update({
     where: { id },
-    data: { content }
+    data: { value }
   });
 
   revalidatePath("/");

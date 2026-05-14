@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
-import { ShoppingCart, Heart, Minus, Plus, Truck, RefreshCw, Shield, ChevronRight, Star } from "lucide-react";
+import { ShoppingCart, ShoppingBag, Heart, Minus, Plus, Truck, RefreshCw, Shield, ChevronRight, Star } from "lucide-react";
 
 export function ProductContent({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const { addItem } = useCart();

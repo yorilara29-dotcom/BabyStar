@@ -54,7 +54,7 @@ export default async function ProductosPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600">{product.category.name}</td>
-                  <td className="px-6 py-4 font-medium">{formatPrice(product.price)}</td>
+                  <td className="px-6 py-4 font-medium">{formatPrice(Number(product.price))}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       (product.inventory?.quantity || 0) <= 5 ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
