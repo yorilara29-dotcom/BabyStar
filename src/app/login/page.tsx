@@ -3,26 +3,12 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { Baby } from 'lucide-react';
 
+import { LoginForm } from '@/components/LoginForm';
+
 export default async function LoginPage() {
   const session = await auth();
   if (session?.user) {
     redirect(session.user.role === 'USER' ? '/' : '/admin');
-  }
-
-  async function handleLogin(formData: FormData) {
-    'use server';
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    try {
-      await signIn('credentials', {
-        email,
-        password,
-        redirectTo: '/admin',
-      });
-    } catch (error) {
-      redirect('/login?error=CredentialsSignin');
-    }
   }
 
   return (
@@ -37,34 +23,7 @@ export default async function LoginPage() {
             <p className="text-gray-500 mt-1">Inicia sesión en tu cuenta</p>
           </div>
 
-          <form action={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all"
-                placeholder="Tu email de administrador"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-              <input
-                type="password"
-                name="password"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-baby-rose focus:ring-2 focus:ring-baby-rose/20 outline-none transition-all"
-                placeholder="••••••••"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full glass-button py-3"
-            >
-              Iniciar sesión
-            </button>
-          </form>
+          <LoginForm />
 
           <div className="mt-6 text-center text-sm text-gray-500">
             <p>Ingresa tus credenciales de administrador</p>
