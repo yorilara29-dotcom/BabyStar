@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.role = user.role ?? 'USER';
         token.sub = user.id;
       }
       return token;
@@ -59,7 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub;
       }
       if (token.role) {
-        session.user.role = token.role;
+        session.user.role = token.role as 'USER' | 'ADMIN' | 'SUPER_ADMIN';
       }
       return session;
     },
