@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, ImageOff } from 'lucide-react';
+import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/utils';
 
@@ -22,6 +23,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const [imageError, setImageError] = useState(false);
   const isLowStock = product.inventory && product.inventory.quantity <= 5 && product.inventory.quantity > 0;
   const isOutOfStock = !product.inventory || product.inventory.quantity === 0;
 
@@ -33,13 +35,23 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       <Link href={`/producto/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden bg-gray-100">
-          <Image
-            src={product.images?.[0] || '/placeholder.jpg'}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
+          {imageError || !product.images || product.images.length === 0 ? (
+            <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-pink-50 to-blue-50/30 text-gray-400">
+              <div className="p-4 bg-white/60 backdrop-blur-sm rounded-full mb-3 shadow-sm border border-white/40">
+                <ImageOff className="w-8 h-8 text-slate-300 stroke-[1.5]" />
+              </div>
+              <span className="text-xs font-medium tracking-wide text-slate-400 uppercase">Sin imagen</span>
+            </div>
+          ) : (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              onError={() => setImageError(true)}
+            />
+          )}
           {isLowStock && (
             <span className="absolute top-2 left-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
               ¡Últimas unidades!

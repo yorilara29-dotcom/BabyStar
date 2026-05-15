@@ -1,6 +1,6 @@
 # BabyStar E-Commerce
 
-E-commerce full-stack construido con Next.js 15, TypeScript, Prisma ORM, Auth.js v5 y Tailwind CSS.
+E-commerce full-stack construido con Next.js 16, TypeScript, Prisma ORM, Auth.js v5 y Tailwind CSS.
 
 ## 🚀 Instalación con PNPM (Recomendado)
 
@@ -11,7 +11,7 @@ pnpm dev
 
 ## Scripts disponibles:
 
-- `pnpm dev` - Desarrollo (con Turbopack en 0.0.0.0)
+- `pnpm dev` - Desarrollo (Automatizado: levanta Docker DB + Turbopack)
 - `pnpm build` - Build de producción
 - `pnpm start` - Iniciar en producción
 - `pnpm lint` - TypeScript check + ESLint
@@ -19,7 +19,7 @@ pnpm dev
 
 ## Stack Tecnológico
 
-- **Framework**: Next.js 15 (App Router + Server Components)
+- **Framework**: Next.js 16 (App Router + Server Components)
 - **Lenguaje**: TypeScript 5
 - **UI**: React 18 + Tailwind CSS 3 + shadcn/ui + Lucide React
 - **DB**: PostgreSQL + Prisma ORM

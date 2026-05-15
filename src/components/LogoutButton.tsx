@@ -1,24 +1,66 @@
 "use client";
 
-import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { LogOut, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function LogoutButton() {
-  const router = useRouter();
+interface LogoutButtonProps {
+  variant?: "default" | "outline" | "ghost";
+  className?: string;
+  showIcon?: boolean;
+}
+
+export function LogoutButton({ 
+  variant = "outline", 
+  className,
+  showIcon = true 
+}: LogoutButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        // Limpiar estados locales
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("cart");
+          sessionStorage.clear();
+        }
+        window.location.href = "/login?loggedOut=true";
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Fallback: redirect anyway
+      window.location.href = "/login";
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <button 
+    <Button
+      variant={variant}
       onClick={handleLogout}
-      className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+      disabled={isLoading}
+      className={cn(
+        "transition-all duration-200",
+        className
+      )}
     >
-      <LogOut className="w-5 h-5" />
-      <span className="font-medium">Cerrar sesión</span>
-    </button>
+      {isLoading ? (
+        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+      ) : showIcon ? (
+        <LogOut className="w-4 h-4 mr-2" />
+      ) : null}
+      {isLoading ? "Saliendo..." : "Cerrar sesión"}
+    </Button>
   );
 }

@@ -40,8 +40,9 @@ Actualmente, la arquitectura está transicionando a **Aplicación Full-Stack**.
 - **Fase 4 completada**: Se refactorizó el storefront (Catálogo dinámico SSR) conectándolo a la DB, se creó CRUD base para Productos en Panel Admin y se generó una ruta para checkout atómico que descuenta stock transaccionalmente.
 - **Fase 5 completada**: Se implementaron listados administrativos (Usuarios y Pedidos), métricas en vivo en el Dashboard y un sistema CMS (`ContentBlock`) que permite modificar dinámicamente el texto de la tienda.
 - **Fase 6 completada**: Se añadieron capas de seguridad (OWASP Security Headers) en `next.config.js` y consolidación final.
+- **Fase 7 (Estabilización y Refinamiento UX)**: Se implementó un sistema de fallback "Premium" para imágenes en `ProductCard.tsx`, se centralizó la lógica de logout para evitar errores de redirección JSON, y se automatizó el inicio de la base de datos PostgreSQL mediante un script `predev` en Docker.
 - La identidad visual principal tomará como referencia los recursos ubicados en `/logos`.
-- El proyecto se dividió en 6 fases de ejecución controlada bajo mentalidad OWASP.
+- El proyecto se dividió en 7 fases de ejecución controlada bajo mentalidad OWASP.
 
 ## Convenciones del Proyecto
 - Componentes en `src/components`, utilidades en `src/lib`.
@@ -55,6 +56,7 @@ Actualmente, la arquitectura está transicionando a **Aplicación Full-Stack**.
 - **Fase 4 (Catálogo, inventario y checkout)**: Completada.
 - **Fase 5 (Panel administrativo y CMS)**: Completada.
 - **Fase 6 (Seguridad, observabilidad y calidad)**: Completada.
+- **Fase 7 (Estabilización y Refinamiento UX)**: Completada.
 
 ## Reglas de desarrollo para futuras tareas
 - **Nunca asumir backend existente**.
@@ -164,9 +166,6 @@ A continuación se presenta el árbol de directorios real y actualizado del proy
 ├── pnpm-workspace.yaml
 ├── postcss.config.mjs
 ├── prisma.config.ts
-├── proceso.md
-├── prompt-fix.md
-├── prompt-migracion-pnpm.md
 ├── proyecto-contexto.md
 ├── tailwind.config.ts
 └── tsconfig.json
