@@ -2,7 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Package, ShoppingBag, Users, FileText, LogOut } from 'lucide-react';
-import { signOut } from '@/auth';
+import { LogoutButton } from '@/components/LogoutButton';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -34,12 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <form action={async () => { 'use server'; await signOut({ redirectTo: '/' }); }}>
-            <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors">
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Cerrar sesión</span>
-            </button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
       <main className="flex-1 ml-64 p-8">{children}</main>

@@ -4,15 +4,16 @@
 Baby Star es una tienda en línea especializada en ropa, accesorios y juguetes para bebés. El objetivo del proyecto es evolucionar desde un prototipo estático de frontend hacia una plataforma ecommerce moderna, segura, escalable y full-stack.
 
 ## Stack Tecnológico Actual
-- **Framework**: Next.js 15.3.7 (App Router)
+- **Framework**: Next.js 16.2.4 (App Router + Turbopack)
 - **Lenguaje**: TypeScript 5.8.3
-- **UI Framework**: React 18.3.1
+- **UI Framework**: React 19.2.5
 - **Estilos**: Tailwind CSS 3.4.17 + shadcn/ui
 - **Iconos**: Lucide React
-- **Herramientas**: Biome, ESLint
+- **Herramientas**: Biome, ESLint, pnpm
 - **Manejo de Estado**: React Context (`CartContext.tsx`)
 - **Base de Datos**: PostgreSQL vía Prisma ORM (esquemas definidos). Datos simulados temporales (`products.json`) listos para ser ingresados mediante el script de seed.
 - **Autenticación**: Auth.js (NextAuth v5) + bcrypt. JWT Session Strategy con RBAC integrado.
+- **Animaciones**: Framer Motion
 
 ## Arquitectura Actual
 Actualmente, la arquitectura está transicionando a **Aplicación Full-Stack**.
@@ -22,11 +23,12 @@ Actualmente, la arquitectura está transicionando a **Aplicación Full-Stack**.
 - Las variables y estados de compras aún viven temporalmente en `localStorage`.
 
 ## Módulos Existentes
-- **Frontend Público (Storefront)**: Home, Tienda, Producto Individual refactorizados como Server Components (SSR) consultando BD.
+- **Frontend Público (Storefront)**: Home, Tienda, Producto Individual refactorizados como Server Components (SSR) consultando BD. Incluye `HeroSection` y `CategorySection`.
 - **Carrito y Checkout**: Checkout Server-Side Transaccional `/api/checkout` (con validación de Stock).
-- **Autenticación**: Página de Login (`/login`) y Middleware de validación de JWT por Roles (`SUPER_ADMIN`, `ADMIN`).
+- **Autenticación**: Página de Login (`/login`) con `LoginForm.tsx`, logout en `/api/auth/logout`, Middleware de validación de JWT por Roles (`SUPER_ADMIN`, `ADMIN`).
 - **Dashboard Admin Base**: Panel de control interactivo con métricas, listados de Usuarios, Pedidos, y CRUD de Productos y CMS.
 - **CMS (Content Management)**: Control en vivo del contenido del Storefront desde la BD (`ContentBlock`).
+- **Componentes UI**: shadcn/ui (`Button`, `Input`, `Select`, `Sheet`).
 
 ## Módulos Faltantes (Arquitectura Objetivo)
 - Pagos Reales (Integración con Stripe o PayPal).
@@ -61,7 +63,7 @@ Actualmente, la arquitectura está transicionando a **Aplicación Full-Stack**.
 - No alterar la marca Baby Star y aprovechar los recursos de diseño ya armados.
 
 ## Estructura de Directorios
-A continuación se presenta el árbol de directorios real y actualizado del proyecto, excluyendo las carpetas `node_modules`, `.git` y `.next`:
+A continuación se presenta el árbol de directorios real y actualizado del proyecto, excluyendo las carpetas `node_modules`, `.git`, `.next` y `react-doctor`:
 
 ```text
 ├── logos
@@ -70,6 +72,8 @@ A continuación se presenta el árbol de directorios real y actualizado del proy
 ├── prisma
 │   ├── schema.prisma
 │   └── seed.ts
+├── public
+│   └── ...
 ├── src
 │   ├── app
 │   │   ├── admin
@@ -89,7 +93,9 @@ A continuación se presenta el árbol de directorios real y actualizado del proy
 │   │   │   └── page.tsx
 │   │   ├── api
 │   │   │   ├── auth
-│   │   │   │   └── [...nextauth]
+│   │   │   │   ├── [...nextauth]
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── logout
 │   │   │   │       └── route.ts
 │   │   │   ├── checkout
 │   │   │   │   └── route.ts
@@ -113,11 +119,21 @@ A continuación se presenta el árbol de directorios real y actualizado del proy
 │   │   └── page.tsx
 │   ├── components
 │   │   ├── CartSlideOver.tsx
+│   │   ├── ContentBlock.tsx
 │   │   ├── Footer.tsx
 │   │   ├── Header.tsx
+│   │   ├── HeroSection.tsx
+│   │   ├── CategorySection.tsx
+│   │   ├── LoginForm.tsx
+│   │   ├── LogoutButton.tsx
 │   │   ├── ProductCard.tsx
 │   │   ├── ProductContent.tsx
 │   │   └── ShopContent.tsx
+│   ├── components/ui
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── select.tsx
+│   │   └── sheet.tsx
 │   ├── context
 │   │   └── CartContext.tsx
 │   ├── data
@@ -129,24 +145,34 @@ A continuación se presenta el árbol de directorios real y actualizado del proy
 │   ├── types
 │   │   └── next-auth.d.ts
 │   ├── auth.ts
-│   └── middleware.ts
+│   ├── auth.config.ts
+│   ├── middleware.ts
+│   └── IA_MEMORY.md
 ├── .env
 ├── .gitignore
+├── .npmrc
 ├── biome.json
-├── bun.lock
 ├── components.json
 ├── docker-compose.yml
 ├── eslint.config.mjs
-├── INSTRUCCION.md
+├── INSTRUCCION_BabyStar_OpenCode.md
 ├── netlify.toml
 ├── next-env.d.ts
 ├── next.config.js
-├── package-lock.json
 ├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ├── postcss.config.mjs
 ├── prisma.config.ts
 ├── proceso.md
+├── prompt-fix.md
+├── prompt-migracion-pnpm.md
 ├── proyecto-contexto.md
 ├── tailwind.config.ts
 └── tsconfig.json
 ```
+
+## Notas Adicionales
+- El proyecto utiliza **pnpm** como gestor de paquetes (migración completada desde npm).
+- Existe un subproyecto `react-doctor/` en el workspace (monorepo).
+- Se ha agregado memoria de IA en `src/IA_MEMORY.md` para referencia del contexto del proyecto.

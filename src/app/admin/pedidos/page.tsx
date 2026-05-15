@@ -39,7 +39,7 @@ export default async function PedidosPage() {
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{order.id.slice(0, 8)}...</td>
                   <td className="px-6 py-4">{order.user?.name || order.user?.email || 'Invitado'}</td>
                   <td className="px-6 py-4">{order.items.length} items</td>
-                  <td className="px-6 py-4 font-medium">{formatPrice(order.total)}</td>
+                  <td className="px-6 py-4 font-medium">{formatPrice(Number(order.total))}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' :
